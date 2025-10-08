@@ -15,26 +15,6 @@ This is a Laravel 12 application using:
 - **Tailwind CSS v4** for styling
 - **Vite** for asset building
 
-## Architecture
-
-### Livewire 
-- **Livewire Component's class**: `app/Livewire/*` Livewire Component classes
-
-### Route Organization
-- `routes/web.php` - Main application routes (dashboard, settings)
-- `routes/auth.php` - Authentication routes (included in web.php)
-- `routes/console.php` - Artisan commands
-
-### View Components
-- **Layouts**: `resources/views/components/layouts/` (app, auth)
-- **Custom Flux components**: `resources/views/flux/` (custom icons, navlist groups)
-- **Reusable components**: `resources/views/components/` (auth-header, app-logo, input-otp, etc.)
-
-### Frontend
-- Entry point: `resources/js/app.js` and `resources/css/app.css`
-- Vite config at `vite.config.js` with Laravel plugin and Tailwind CSS v4 plugin
-- Flux UI components are used throughout (Livewire's official UI library)
-
 ## CODING_PRACTICES
 
 ### Guidelines for ARCHITECTURE
@@ -47,15 +27,43 @@ This is a Laravel 12 application using:
 - 3) New integration patterns
 - 4) Database schema changes
 
-#### DDD
+#### Route Organization
+- `routes/web.php` - Main application routes (dashboard, settings)
+- `routes/auth.php` - Authentication routes (included in web.php)
+- `routes/console.php` - Artisan commands
 
-- Define bounded contexts to separate different parts of the domain with clear boundaries
-- Implement ubiquitous language within each context to align code with business terminology
-- Create rich domain models with behavior, not just data structures, for {{core_domain_entities}}
-- Use value objects for concepts with no identity but defined by their attributes
-- Implement domain events to communicate between bounded contexts
-- Use aggregates to enforce consistency boundaries and transactional integrity
+#### Frontend
+- Entry point: `resources/js/app.js` and `resources/css/app.css`
+- Vite config at `vite.config.js` with Laravel plugin and Tailwind CSS v4 plugin
+- Flux UI components are used throughout (Livewire's official UI library)
 
+#### BLADE COMPONENTS, BLADE LAYOUTS ,LIVEWIRE
+- Divide Blade templates into components, layouts and Livewire components
+- Try to keep each component focused on a single responsibility
+
+#### BLADE COMPONENTS
+- Organize components in `resources/views/components/`
+- Components should be as small as possible, better to have more smaller components than fewer large ones
+- Use components for reusable UI elements (e.g., buttons, form inputs)
+- Organize components class in `app/View/Components/`
+- Each component class should have a single responsibility, move logic to services if needed
+- Use anonymous components for simple, reusable UI elements that do not require a dedicated class
+
+#### BLADE LAYOUTS
+- Organize layouts in `resources/views/components/layouts/`
+- Use layouts for overall page structure (e.g., app layout, auth layout)
+
+#### BLADE PARTIALS
+- Do not use Blade partials; prefer components
+
+#### Livewire Components
+- Use Livewire components for interactive elements (e.g., forms, dynamic lists)
+- Organize Livewire class in `app/Livewire/`
+- Organize Livewire views in `resources/views/livewire/`
+- Each Livewire component should have a single responsibility, move logic to services if needed
+
+#### Flux Components
+- **Custom Flux components**: `resources/views/flux/` (custom icons, navlist groups)
 
 ## BACKEND
 
@@ -84,7 +92,7 @@ This is a Laravel 12 application using:
 - Use property type declarations
 - Use constructor property promotion
 - Use readonly properties for immutable data
-- 
+
 ## FRONTEND
 
 ### Guidelines for STYLING
@@ -116,7 +124,6 @@ This is a Laravel 12 application using:
 - Use @props directive in anonymous components
 - Use $attributes bag for pass-through attributes (Components MUST render the {{ $attributes }} variable to allow parent-defined attributes to pass through to the root element-)
 
-
 ## Development Commands
 
 ### Livewire
@@ -124,6 +131,17 @@ This is a Laravel 12 application using:
 php artisan livewire:make ComponentName
 ```
 Creates a new Livewire component.
+
+### Components
+```bash
+php artisan make:component ComponentName
+```
+Creates a new Blade component.
+
+```bash
+php  artisan make:component ComponentName --view
+```
+Creates a new anonymous Blade component.
 
 ### Starting Development Server
 ```bash
