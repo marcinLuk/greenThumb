@@ -2,7 +2,7 @@
 - **Laravel 12**
 - **Livewire v3** and **Livewire Volt v1.7** for reactive components
 - **Livewire Flux** for UI components
-- **Laravel Fortify** for authentication (currently only 2FA is enabled)
+- **Laravel Fortify** for authentication (currently 2FA, and email verification for registration is enabled)
 - **Tailwind CSS v4** for styling
 - **Vite** for asset building
 - **AI Integration**: OpenRouter.ai

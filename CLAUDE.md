@@ -14,6 +14,7 @@ This is a Laravel 12 application using:
 - **Laravel Fortify** for authentication (currently only 2FA is enabled)
 - **Tailwind CSS v4** for styling
 - **Vite** for asset building
+- 
 
 ## CODING_PRACTICES
 
@@ -189,4 +190,11 @@ php artisan migrate:fresh --seed # Fresh migration with seeding
 ```
 Default database is Mysql
 
-### Rules
+### Observers
+```bash
+php artisan make:observer UserObserver --model=User
+
+```
+Creates a new model observer.
+
+
