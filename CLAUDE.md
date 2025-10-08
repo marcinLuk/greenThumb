@@ -122,7 +122,6 @@ This is a Laravel 12 application using:
 - Use @once directive for single-execution code
 - Use x- prefix for Blade components
 - Use @props directive in anonymous components
-- Use $attributes bag for pass-through attributes (Components MUST render the {{ $attributes }} variable to allow parent-defined attributes to pass through to the root element-)
 
 ## Development Commands
 
@@ -183,6 +182,7 @@ npm run dev      # Development build with watch
 
 ### Database
 ```bash
+php artisan make:migration create_table_name --create=table_name  # Create a new migration
 php artisan migrate              # Run migrations
 php artisan migrate:fresh        # Fresh migration (drops all tables)
 php artisan migrate:fresh --seed # Fresh migration with seeding
