@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GetEntriesByDateRangeRequest;
 use App\Http\Requests\GetJournalEntriesRequest;
 use App\Http\Resources\JournalEntryResource;
 use App\Models\JournalEntry;
@@ -80,5 +81,34 @@ class JournalEntryController extends Controller
                 'message' => 'Journal entry not found',
             ], 404);
         }
+    }
+
+    /**
+     * Retrieve journal entries within a specific date range for weekly calendar view.
+     *
+     * @param GetEntriesByDateRangeRequest $request
+     * @return JsonResponse
+     */
+    public function dateRange(GetEntriesByDateRangeRequest $request): JsonResponse
+    {
+        // Get validated data
+        $validated = $request->validated();
+
+        // Query entries within date range (UserOwnedScope auto-applies user filter)
+        $entries = JournalEntry::query()
+            ->withinDateRange($validated['start_date'], $validated['end_date'])
+            ->orderBy('entry_date', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Format response with data and metadata
+        return response()->json([
+            'data' => JournalEntryResource::collection($entries),
+            'meta' => [
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'total_entries' => $entries->count(),
+            ],
+        ], 200);
     }
 }
