@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GetEntriesByDateRangeRequest;
 use App\Http\Requests\GetJournalEntriesRequest;
+use App\Http\Requests\StoreJournalEntryRequest;
 use App\Http\Resources\JournalEntryResource;
 use App\Models\JournalEntry;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class JournalEntryController extends Controller
 {
@@ -110,5 +112,51 @@ class JournalEntryController extends Controller
                 'total_entries' => $entries->count(),
             ],
         ], 200);
+    }
+
+    /**
+     * Store a newly created journal entry.
+     *
+     * Creates a new journal entry for the authenticated user. Enforces a maximum
+     * limit of 50 entries per user. The entry must have a date that is today or
+     * in the past.
+     *
+     * @param StoreJournalEntryRequest $request
+     * @return JournalEntryResource|JsonResponse
+     */
+    public function store(StoreJournalEntryRequest $request): JournalEntryResource|JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            
+            $entriesCount = auth()->user()->entriesCount()->first();
+            if ($entriesCount && $entriesCount->count >= 50) {
+                return response()->json([
+                    'message' => 'You have reached the maximum limit of 50 journal entries.',
+                ], 403);
+            }
+
+           
+            $journalEntry = DB::transaction(function () use ($validated) {
+                $data = array_merge($validated, [
+                    'user_id' => auth()->id(),
+                ]);
+                
+                return JournalEntry::create($data);
+            });
+            
+            return (new JournalEntryResource($journalEntry))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Exception $e) {
+            \Log::error('Failed to create journal entry', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+            
+            return response()->json([
+                'message' => 'Failed to create journal entry. Please try again.',
+            ], 500);
+        }
     }
 }
