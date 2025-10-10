@@ -51,4 +51,34 @@ class JournalEntryController extends Controller
         // Return formatted response with pagination metadata
         return JournalEntryResource::collection($entries);
     }
+
+    /**
+     * Display the specified journal entry.
+     *
+     * @param string $id
+     * @return JournalEntryResource|\Illuminate\Http\JsonResponse
+     */
+    public function show(string $id): JournalEntryResource|\Illuminate\Http\JsonResponse
+    {
+        // Validate that ID is numeric
+        if (!is_numeric($id)) {
+            return response()->json([
+                'message' => 'Invalid entry ID format',
+            ], 400);
+        }
+
+        try {
+            // Find entry by ID - UserOwnedScope automatically filters by authenticated user
+            // This returns 404 if entry doesn't exist OR belongs to another user (prevents info disclosure)
+            $entry = JournalEntry::findOrFail($id);
+
+            // Return formatted entry resource
+            return new JournalEntryResource($entry);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Return 404 instead of 403 to prevent entry ID enumeration
+            return response()->json([
+                'message' => 'Journal entry not found',
+            ], 404);
+        }
+    }
 }

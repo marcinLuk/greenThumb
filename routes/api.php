@@ -18,4 +18,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/journal-entries', [JournalEntryController::class, 'index'])
         ->name('api.journal-entries.index');
+    Route::get('/journal-entries/{id}', [JournalEntryController::class, 'show'])
+        ->name('api.journal-entries.show');
 });
