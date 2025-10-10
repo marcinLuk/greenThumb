@@ -32,29 +32,23 @@ class JournalEntryController extends Controller
      */
     public function index(GetJournalEntriesRequest $request): AnonymousResourceCollection
     {
-        // Get validated data
         $validated = $request->validated();
-
-        // Build query starting with JournalEntry (global scope auto-applies user filter)
+        
         $query = JournalEntry::query();
-
-        // Apply date range filter if provided
+        
         if (isset($validated['start_date']) || isset($validated['end_date'])) {
             $query->withinDateRange(
                 $validated['start_date'] ?? null,
                 $validated['end_date'] ?? null
             );
         }
-
-        // Apply sorting
+        
         $sortDirection = $request->getSortDirection();
         $query->sortByDate($sortDirection);
-
-        // Paginate results
+        
         $perPage = $request->getPerPage();
         $entries = $query->paginate($perPage);
-
-        // Return formatted response with pagination metadata
+        
         return JournalEntryResource::collection($entries);
     }
 
@@ -66,7 +60,6 @@ class JournalEntryController extends Controller
      */
     public function show(string $id): JournalEntryResource|JsonResponse
     {
-        // Validate that ID is numeric
         if (!is_numeric($id)) {
             return response()->json([
                 'message' => 'Invalid entry ID format',
@@ -75,11 +68,9 @@ class JournalEntryController extends Controller
 
         try {
             $entry = JournalEntry::findOrFail($id);
-
-            // Return formatted entry resource
+            
             return new JournalEntryResource($entry);
         } catch (ModelNotFoundException $e) {
-            // Return 404 instead of 403 to prevent entry ID enumeration
             return response()->json([
                 'message' => 'Journal entry not found',
             ], 404);
@@ -94,17 +85,14 @@ class JournalEntryController extends Controller
      */
     public function dateRange(GetEntriesByDateRangeRequest $request): JsonResponse
     {
-        // Get validated data
         $validated = $request->validated();
-
-        // Query entries within date range (UserOwnedScope auto-applies user filter)
+        
         $entries = JournalEntry::query()
             ->withinDateRange($validated['start_date'], $validated['end_date'])
             ->orderBy('entry_date', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
-
-        // Format response with data and metadata
+        
         return response()->json([
             'data' => JournalEntryResource::collection($entries),
             'meta' => [
@@ -112,7 +100,7 @@ class JournalEntryController extends Controller
                 'end_date' => $validated['end_date'],
                 'total_entries' => $entries->count(),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -168,7 +156,6 @@ class JournalEntryController extends Controller
      */
     public function update(UpdateJournalEntryRequest $request, string $id): JournalEntryResource|JsonResponse
     {
-        // Validate that ID is numeric
         if (!is_numeric($id)) {
             return response()->json([
                 'message' => 'Invalid entry ID format',
@@ -176,19 +163,14 @@ class JournalEntryController extends Controller
         }
 
         try {
-            // Find the journal entry - UserOwnedScope ensures data isolation
             $entry = JournalEntry::findOrFail($id);
-
-            // Authorize the update action using policy
+            
             $this->authorize('update', $entry);
-
-            // Get validated data
+            
             $validated = $request->validated();
-
-            // Update the entry
+            
             $entry->update($validated);
 
-            // Return the updated entry resource
             return new JournalEntryResource($entry);
         } catch (ModelNotFoundException $e) {
             // Return 404 instead of 403 to prevent entry ID enumeration
@@ -196,13 +178,56 @@ class JournalEntryController extends Controller
                 'message' => 'Journal entry not found',
             ], 404);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
-            // This should rarely happen due to UserOwnedScope, but handle it anyway
             return response()->json([
                 'message' => 'Journal entry not found',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to update journal entry. Please try again.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified journal entry from storage.
+     *
+     * Deletes an existing journal entry for the authenticated user. Users can only
+     * delete their own entries. Upon successful deletion, the user's entry count
+     * is automatically decremented via the JournalEntryObserver.
+     *
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        if (!is_numeric($id)) {
+            return response()->json([
+                'message' => 'Invalid entry ID format',
+            ], 400);
+        }
+
+        try {
+            $entry = JournalEntry::findOrFail($id);
+            
+            $this->authorize('delete', $entry);
+            
+            $entry->delete();
+            
+            return response()->json([
+                'message' => 'Journal entry deleted successfully',
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            // Return 404 instead of 403 to prevent entry ID enumeration
+            return response()->json([
+                'message' => 'Journal entry not found',
+            ], 404);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'message' => 'Journal entry not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the entry',
             ], 500);
         }
     }

@@ -26,4 +26,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         ->name('api.journal-entries.show');
     Route::put('/journal-entries/{id}', [JournalEntryController::class, 'update'])
         ->name('api.journal-entries.update');
+    Route::delete('/journal-entries/{id}', [JournalEntryController::class, 'destroy'])
+        ->name('api.journal-entries.destroy');
 });
