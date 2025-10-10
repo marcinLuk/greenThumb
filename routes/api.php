@@ -24,4 +24,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         ->name('api.journal-entries.date-range');
     Route::get('/journal-entries/{id}', [JournalEntryController::class, 'show'])
         ->name('api.journal-entries.show');
+    Route::put('/journal-entries/{id}', [JournalEntryController::class, 'update'])
+        ->name('api.journal-entries.update');
 });

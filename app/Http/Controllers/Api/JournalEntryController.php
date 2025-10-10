@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GetEntriesByDateRangeRequest;
 use App\Http\Requests\GetJournalEntriesRequest;
 use App\Http\Requests\StoreJournalEntryRequest;
+use App\Http\Requests\UpdateJournalEntryRequest;
 use App\Http\Resources\JournalEntryResource;
 use App\Models\JournalEntry;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -128,7 +129,7 @@ class JournalEntryController extends Controller
     {
         try {
             $validated = $request->validated();
-            
+
             $entriesCount = auth()->user()->entriesCount()->first();
             if ($entriesCount && $entriesCount->count >= 50) {
                 return response()->json([
@@ -136,26 +137,72 @@ class JournalEntryController extends Controller
                 ], 403);
             }
 
-           
+
             $journalEntry = DB::transaction(function () use ($validated) {
                 $data = array_merge($validated, [
                     'user_id' => auth()->id(),
                 ]);
-                
+
                 return JournalEntry::create($data);
             });
-            
+
             return (new JournalEntryResource($journalEntry))
                 ->response()
                 ->setStatusCode(201);
         } catch (\Exception $e) {
-            \Log::error('Failed to create journal entry', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-            
             return response()->json([
                 'message' => 'Failed to create journal entry. Please try again.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Update the specified journal entry.
+     *
+     * Updates an existing journal entry for the authenticated user. Users can only
+     * update their own entries. The entry date must be today or in the past.
+     *
+     * @param UpdateJournalEntryRequest $request
+     * @param string $id
+     * @return JournalEntryResource|JsonResponse
+     */
+    public function update(UpdateJournalEntryRequest $request, string $id): JournalEntryResource|JsonResponse
+    {
+        // Validate that ID is numeric
+        if (!is_numeric($id)) {
+            return response()->json([
+                'message' => 'Invalid entry ID format',
+            ], 400);
+        }
+
+        try {
+            // Find the journal entry - UserOwnedScope ensures data isolation
+            $entry = JournalEntry::findOrFail($id);
+
+            // Authorize the update action using policy
+            $this->authorize('update', $entry);
+
+            // Get validated data
+            $validated = $request->validated();
+
+            // Update the entry
+            $entry->update($validated);
+
+            // Return the updated entry resource
+            return new JournalEntryResource($entry);
+        } catch (ModelNotFoundException $e) {
+            // Return 404 instead of 403 to prevent entry ID enumeration
+            return response()->json([
+                'message' => 'Journal entry not found',
+            ], 404);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            // This should rarely happen due to UserOwnedScope, but handle it anyway
+            return response()->json([
+                'message' => 'Journal entry not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update journal entry. Please try again.',
             ], 500);
         }
     }
