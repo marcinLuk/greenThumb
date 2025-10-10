@@ -86,11 +86,14 @@ This is a Laravel 12 application using:
 - Use local scopes for common query patterns
 - Implement `ShouldHandleEventsAfterCommit` on observers when working with database transactions
 - Consider UUID or ULID primary keys for distributed systems
-- Use attributes like `#[ScopedBy]` and `#[ObservedBy]` for cleaner code
 - Use `withAttributes()` in scopes for consistent model creation
 - Keep models focused on database interaction, not business logic
 - Use model events appropriately without overusing them
 - Document custom properties and methods clearly
+
+### API
+- all API routes should be defined in `routes/api.php`
+- all API controllers should be in `app/Http/Controllers/Api/`
 
 #### REGISTERING MICROSERVICES
 - Always register service bindings within service providers
@@ -98,7 +101,7 @@ This is a Laravel 12 application using:
 - Prefer automatic resolution over manual binding (#[Bind] attribute)
 - Use constructor injection for required dependencies
 - Accept the Application container for sub-dependencies
-- -Never use the service locator pattern
+- Never use the service locator pattern
 - Use singleton binding for shared state services (#[Singleton] attribute)
 - Use scoped binding for request-specific services
 - Use contextual binding for different implementations-
@@ -115,7 +118,7 @@ This is a Laravel 12 application using:
 - Use property type declarations
 - Use constructor property promotion
 - Use readonly properties for immutable data
-- Do not use Repository pattern with Eloquent
+- Try to avoid necessary comments, write self-documenting code using clear names
 
 ## FRONTEND
 
@@ -130,7 +133,6 @@ This is a Laravel 12 application using:
 - Implement the Tailwind configuration file for customizing theme, plugins, and variants
 - Use component extraction for repeated UI patterns instead of copying utility classes
 - Leverage the theme() function in CSS for accessing Tailwind theme values
-- Implement dark mode with the dark: variant
 - Use responsive variants (sm:, md:, lg:, etc.) for adaptive designs
 - Leverage state variants (hover:, focus:, active:, etc.) for interactive elements
 

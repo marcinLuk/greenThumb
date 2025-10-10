@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GetJournalEntriesRequest;
 use App\Http\Resources\JournalEntryResource;
 use App\Models\JournalEntry;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class JournalEntryController extends Controller
@@ -58,7 +60,7 @@ class JournalEntryController extends Controller
      * @param string $id
      * @return JournalEntryResource|\Illuminate\Http\JsonResponse
      */
-    public function show(string $id): JournalEntryResource|\Illuminate\Http\JsonResponse
+    public function show(string $id): JournalEntryResource|JsonResponse
     {
         // Validate that ID is numeric
         if (!is_numeric($id)) {
@@ -68,13 +70,11 @@ class JournalEntryController extends Controller
         }
 
         try {
-            // Find entry by ID - UserOwnedScope automatically filters by authenticated user
-            // This returns 404 if entry doesn't exist OR belongs to another user (prevents info disclosure)
             $entry = JournalEntry::findOrFail($id);
 
             // Return formatted entry resource
             return new JournalEntryResource($entry);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             // Return 404 instead of 403 to prevent entry ID enumeration
             return response()->json([
                 'message' => 'Journal entry not found',
