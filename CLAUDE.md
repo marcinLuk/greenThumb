@@ -70,6 +70,28 @@ This is a Laravel 12 application using:
 
 ### Guidelines for PHP/Laravel
 
+### LARAVEL ELOQUENT MODELS
+- Follow snake_case plural naming for table names
+- Use standard primary key conventions or explicitly define custom keys
+- Always define `$fillable` or `$guarded` properties to protect against mass assignment vulnerabilities
+- Enable `preventSilentlyDiscardingAttributes()` in development to catch unfillable attribute errors
+- Use chunking methods for processing large datasets
+- Leverage query scopes for reusable query logic
+- Implement soft deletes when records should be recoverable
+- Use model pruning for automatic cleanup of old records
+- Define default attribute values when appropriate
+- Properly configure timestamp behavior
+- Use observers to centralize event handling logic
+- Use global scopes for universal query constraints
+- Use local scopes for common query patterns
+- Implement `ShouldHandleEventsAfterCommit` on observers when working with database transactions
+- Consider UUID or ULID primary keys for distributed systems
+- Use attributes like `#[ScopedBy]` and `#[ObservedBy]` for cleaner code
+- Use `withAttributes()` in scopes for consistent model creation
+- Keep models focused on database interaction, not business logic
+- Use model events appropriately without overusing them
+- Document custom properties and methods clearly
+
 #### REGISTERING MICROSERVICES
 - Always register service bindings within service providers
 - Use type-hinted interfaces for dependency injection
@@ -93,6 +115,7 @@ This is a Laravel 12 application using:
 - Use property type declarations
 - Use constructor property promotion
 - Use readonly properties for immutable data
+- Do not use Repository pattern with Eloquent
 
 ## FRONTEND
 

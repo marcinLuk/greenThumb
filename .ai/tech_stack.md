@@ -7,3 +7,4 @@
 - **Vite** for asset building
 - **AI Integration**: OpenRouter.ai
 - **Database**: MySQL
+- **Eloquent ORM** for database interactions
