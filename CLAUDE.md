@@ -28,47 +28,21 @@ This is a Laravel 12 application using:
 - 3) New integration patterns
 - 4) Database schema changes
 
-#### Route Organization
-- `routes/web.php` - Main application routes (dashboard, settings)
-- `routes/auth.php` - Authentication routes (included in web.php)
-- `routes/console.php` - Artisan commands
 
 #### Frontend
 - Entry point: `resources/js/app.js` and `resources/css/app.css`
 - Vite config at `vite.config.js` with Laravel plugin and Tailwind CSS v4 plugin
 - Flux UI components are used throughout (Livewire's official UI library)
 
-#### BLADE COMPONENTS, BLADE LAYOUTS ,LIVEWIRE
-- Divide Blade templates into components, layouts and Livewire components
-- Try to keep each component focused on a single responsibility
-
-#### BLADE COMPONENTS
-- Organize components in `resources/views/components/`
-- Components should be as small as possible, better to have more smaller components than fewer large ones
-- Use components for reusable UI elements (e.g., buttons, form inputs)
-- Organize components class in `app/View/Components/`
-- Each component class should have a single responsibility, move logic to services if needed
-- Use anonymous components for simple, reusable UI elements that do not require a dedicated class
-
-#### BLADE LAYOUTS
-- Organize layouts in `resources/views/components/layouts/`
-- Use layouts for overall page structure (e.g., app layout, auth layout)
-
-#### BLADE PARTIALS
-- Do not use Blade partials; prefer components
-
-#### Livewire Components
-- Use Livewire components for interactive elements (e.g., forms, dynamic lists)
-- Organize Livewire class in `app/Livewire/`
-- Organize Livewire views in `resources/views/livewire/`
-- Each Livewire component should have a single responsibility, move logic to services if needed
-
-#### Flux Components
-- **Custom Flux components**: `resources/views/flux/` (custom icons, navlist groups)
-
 ## BACKEND
 
 ### Guidelines for PHP/Laravel
+
+#### Route Organization
+- `routes/web.php` - Main application routes (dashboard, settings)
+- `routes/auth.php` - Authentication routes (included in web.php)
+- `routes/console.php` - Artisan commands
+
 
 ### LARAVEL ELOQUENT MODELS
 - Follow snake_case plural naming for table names
@@ -89,7 +63,6 @@ This is a Laravel 12 application using:
 - Use `withAttributes()` in scopes for consistent model creation
 - Keep models focused on database interaction, not business logic
 - Use model events appropriately without overusing them
-- Document custom properties and methods clearly
 
 ### API
 - all API routes should be defined in `routes/api.php`
@@ -121,6 +94,42 @@ This is a Laravel 12 application using:
 - Try to avoid necessary comments, write self-documenting code using clear names
 
 ## FRONTEND
+
+### Guidelines for BLADE/LIVEWIRE/FLUX
+
+#### BLADE COMPONENTS, BLADE LAYOUTS ,LIVEWIRE
+- Divide Blade templates into components, layouts and Livewire components
+- Try to keep each component focused on a single responsibility
+
+#### Livewire Components
+- Use Livewire components only for interactive, stateful UI elements only
+- All LiveWire components are located in `resources/views/livewire/` directory
+- All livewire component classes are in `app/Livewire/` directory
+- Use Artisan command to generate components: `php artisan make:livewire ComponentName`
+- For nested components, use dot-notation syntax: `php artisan make:livewire Namespace.ComponentName`
+- Try to avoid generating large monolithic components; break them into nested components instead
+- Every component must have a `render()` and `with()` method
+
+#### BLADE COMPONENTS
+- Use Blade components for reusable, stateless UI elements
+- All BLade components are located in `resources/views/components/`
+- All BLade components are located in `app/View/Components/`
+- Use Artisan command to generate components: `php artisan make:component ComponentName`
+- For nested components use `php artisan make:component Namespace.ComponentName`
+- Use the `--view` flag to create anonymous components without a class.
+- Components should be as small as possible, break large components into smaller ones
+- Each component class should have a single responsibility, move logic to services if needed
+- Use anonymous components for simple, reusable UI elements that do not require a dedicated class
+
+#### BLADE LAYOUTS
+- Organize layouts in `resources/views/components/layouts/`
+- Use layouts for overall page structure (e.g., app layout, auth layout)
+
+#### BLADE PARTIALS
+- Do not use Blade partials; prefer components
+
+#### Flux Components
+- **Custom Flux components**: `resources/views/flux/` (custom icons, navlist groups)
 
 ### Guidelines for STYLING
 
