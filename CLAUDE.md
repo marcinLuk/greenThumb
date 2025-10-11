@@ -114,10 +114,11 @@ This is a Laravel 12 application using:
 - Use Blade components for reusable, stateless UI elements
 - All BLade components are located in `resources/views/components/`
 - All BLade components are located in `app/View/Components/`
-- Use Artisan command to generate components: `php artisan make:component ComponentName`
-- For nested components use `php artisan make:component Namespace.ComponentName`
+- Always use Artisan command to generate components: `php artisan make:component ComponentName`
+- Always use Artisan command For nested components `php artisan make:component Namespace.ComponentName`
+- When creating nested components, create subdirectory `resources/views/components/namespace/`, save main file as `index.blade.php` and all related files in same directory
 - Use the `--view` flag to create anonymous components without a class.
-- Components should be as small as possible, break large components into smaller ones
+- Components should be as small as possible, break large components into smaller ones using nesting
 - Each component class should have a single responsibility, move logic to services if needed
 - Use anonymous components for simple, reusable UI elements that do not require a dedicated class
 
