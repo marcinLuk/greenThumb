@@ -7,6 +7,7 @@ use App\Http\Requests\GetEntriesByDateRangeRequest;
 use App\Http\Requests\GetJournalEntriesRequest;
 use App\Http\Requests\StoreJournalEntryRequest;
 use App\Http\Requests\UpdateJournalEntryRequest;
+use App\Http\Resources\EntriesCountResource;
 use App\Http\Resources\JournalEntryResource;
 use App\Models\JournalEntry;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -230,5 +231,21 @@ class JournalEntryController extends Controller
                 'message' => 'An error occurred while deleting the entry',
             ], 500);
         }
+    }
+
+    /**
+     * Get the authenticated user's current entry count.
+     *
+     * Returns the number of journal entries the user has created, along with
+     * the remaining entries available (based on the 50-entry limit) and whether
+     * the user has reached the maximum limit.
+     *
+     * @return EntriesCountResource
+     */
+    public function getEntryCount(): EntriesCountResource
+    {
+        $entriesCount = auth()->user()->entriesCount;
+
+        return new EntriesCountResource($entriesCount);
     }
 }

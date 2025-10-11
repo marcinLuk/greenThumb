@@ -77,4 +77,28 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(EntriesCount::class);
     }
+
+    /**
+     * Get the number of remaining entries the user can create.
+     *
+     * @return int
+     */
+    public function getRemainingEntryCount(): int
+    {
+        $currentCount = $this->entriesCount?->count ?? 0;
+
+        return max(0, 50 - $currentCount);
+    }
+
+    /**
+     * Check if the user has reached the entry limit.
+     *
+     * @return bool
+     */
+    public function isAtEntryLimit(): bool
+    {
+        $currentCount = $this->entriesCount?->count ?? 0;
+
+        return $currentCount >= 50;
+    }
 }
