@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\JournalEntryController;
+use App\Http\Controllers\Api\SearchController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group.
 |
 */
+
+// Search API endpoint
+Route::middleware(['auth:sanctum', 'throttle:10,1'])->group(function () {
+    Route::post('/search', [SearchController::class, 'search'])
+        ->name('api.search');
+});
 
 // Journal Entry API endpoints
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
