@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\CalendarView;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -8,12 +9,18 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
 Route::get('/', function () {
-    return view('home');
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('calendar', CalendarView::class)
+    ->middleware(['auth', 'verified'])
+    ->name('calendar');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

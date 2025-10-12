@@ -15,6 +15,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Controller for managing journal entries.
+ *
+ * This controller handles CRUD operations for journal entries, including
+ * listing, viewing, creating, updating, and deleting entries. It also
+ * provides functionality to retrieve entries within a specific date range
+ * and to get the authenticated user's entry count.
+ *
+ * All actions are protected by authentication middleware to ensure that
+ * only authenticated users can access these endpoints.
+ */
 class JournalEntryController extends Controller
 {
     /**
@@ -34,22 +45,22 @@ class JournalEntryController extends Controller
     public function index(GetJournalEntriesRequest $request): AnonymousResourceCollection
     {
         $validated = $request->validated();
-        
+
         $query = JournalEntry::query();
-        
+
         if (isset($validated['start_date']) || isset($validated['end_date'])) {
             $query->withinDateRange(
                 $validated['start_date'] ?? null,
                 $validated['end_date'] ?? null
             );
         }
-        
+
         $sortDirection = $request->getSortDirection();
         $query->sortByDate($sortDirection);
-        
+
         $perPage = $request->getPerPage();
         $entries = $query->paginate($perPage);
-        
+
         return JournalEntryResource::collection($entries);
     }
 
@@ -69,7 +80,7 @@ class JournalEntryController extends Controller
 
         try {
             $entry = JournalEntry::findOrFail($id);
-            
+
             return new JournalEntryResource($entry);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -87,13 +98,13 @@ class JournalEntryController extends Controller
     public function dateRange(GetEntriesByDateRangeRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $entries = JournalEntry::query()
             ->withinDateRange($validated['start_date'], $validated['end_date'])
             ->orderBy('entry_date', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
-        
+
         return response()->json([
             'data' => JournalEntryResource::collection($entries),
             'meta' => [
@@ -165,11 +176,11 @@ class JournalEntryController extends Controller
 
         try {
             $entry = JournalEntry::findOrFail($id);
-            
+
             $this->authorize('update', $entry);
-            
+
             $validated = $request->validated();
-            
+
             $entry->update($validated);
 
             return new JournalEntryResource($entry);
@@ -209,11 +220,11 @@ class JournalEntryController extends Controller
 
         try {
             $entry = JournalEntry::findOrFail($id);
-            
+
             $this->authorize('delete', $entry);
-            
+
             $entry->delete();
-            
+
             return response()->json([
                 'message' => 'Journal entry deleted successfully',
             ], 200);
