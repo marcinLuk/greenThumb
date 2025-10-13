@@ -12,7 +12,8 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.item icon="calendar-date-range" :href="route('calendar')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Gardening Journal ') }}</flux:navlist.item>
+                <flux:navlist.item icon="calendar-date-range" :href="route('calendar')" :current="request()->routeIs('calendar')" wire:navigate>{{ __('Gardening Journal ') }}</flux:navlist.item>
+                <flux:navlist.item icon="magnifying-glass" :href="route('search')" :current="request()->routeIs('search')" wire:navigate>{{ __('Search') }}</flux:navlist.item>
             </flux:navlist>
 
             <flux:spacer />
@@ -114,6 +115,9 @@
         </flux:header>
 
         {{ $slot }}
+
+        {{-- Entry Modal --}}
+        <livewire:entry-modal />
 
         @fluxScripts
     </body>

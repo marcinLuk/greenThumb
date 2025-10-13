@@ -77,6 +77,5 @@
                 modal.openEditModal(entryId);
             }
         }
-
     </script>
 </div>

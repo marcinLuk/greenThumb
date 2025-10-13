@@ -2,13 +2,13 @@
 
 ## 1. UI Structure Overview
 
-GreenThumb follows a modal-based interaction pattern with a central calendar view as the primary interface. 
+GreenThumb follows a dashboard-based interaction pattern with a central calendar view as the primary interface.
 The application uses a single-page application approach for the authenticated experience, with separate pages for authentication flows.
 
 ### Core Architecture Principles:
 - **Calendar-Centric Design**: The weekly calendar view serves as the primary workspace after authentication
-- **Modal-Based Interactions**: All entry management (create, view, edit) and search functionality occur in modal overlays
-- **Minimal Navigation**: Simple top navigation bar with search access and user menu
+- **Modal-Based Entry Management**: Entry creation, viewing, and editing occur in modal overlays
+- **Sidebar Navigation**: Dashboard-style sidebar with navigation links and search access
 - **Weekly View Pattern**: List-based weekly display showing 7 days with entries grouped under each date
 - **RESTful API Integration**: All data operations use the available API endpoints with Sanctum authentication
 - **Responsive Design**: Desktop-first approach ensuring usability across all device sizes
@@ -48,10 +48,14 @@ Users can navigate between weeks, view entries, create new entries, and access s
 
 **Key View Components**:
 
-- **Top Navigation Bar Component**:
-  - Application name (left)
-  - Search button with "Ask AI to find..." text (center)
-  - Login / Register buttons on right if unauthenticated
+- **Sidebar Component**:
+  - Application logo/name (top)
+  - Navigation links:
+    - Gardening Journal (active when on calendar view)
+    - Search (links to /search view)
+  - User menu (bottom):
+    - User email display
+    - Logout button
 
 - **Welcome Message Component**:
   - Displays for not logged-in users: "Welcome to GreenThumb! Please log in or register to manage your journal entries."
@@ -205,13 +209,14 @@ The modal transforms between states based on user actions.
 
 ---
 
-### 2.8 Search Modal
+### 2.8 Search View
 
-**Path**: Modal overlay (not a separate route)
-**Trigger**: Click search button in top navigation
+**Path**: `/search`
+**Authentication**: Authenticated and verified users only
+**Trigger**: Click "Search" link in sidebar navigation
 
 **Main Purpose**:
-Allow users to search their journal entries using natural language queries. 
+Allow users to search their journal entries using natural language queries.
 Display AI-powered search results with relevant entries, showing title, date, and content snippets with highlighted keywords.
 
 **Key Information to Display**:
@@ -222,24 +227,39 @@ Display AI-powered search results with relevant entries, showing title, date, an
 
 **Key View Components**:
 
+- **Sidebar Component** (shared with Calendar View):
+  - Application logo/name (top)
+  - Navigation links:
+    - Gardening Journal (links to /calendar)
+    - Search (active when on search view)
+  - User menu (bottom):
+    - User email display
+    - Logout button
+
 - **Search Input Component**:
+  - Page heading: "Search Your Journal"
   - Text input with placeholder: "Ask AI to find..."
   - Character limit: 3 minimum, 200 maximum
   - Helper text: "Enter at least 3 characters to search"
   - "Search" button (disabled until 3+ characters entered, shows loading spinner during search)
-  - "Close" button (X icon, top-right corner)
+  - Prominent position at top of main content area
 
 - **Search Results Component**:
   - Results header: AI-generated summary or "Found X entries matching your query"
   - Results list:
     - Each result displays:
       - Entry title (clickable, opens Entry Modal in view mode)
+      - Entry date
     - Clicking an entry title opens the Entry Modal in view mode
   - Results are sorted by relevance
 
-- **No Results State**:
+- **Empty State** (before search):
+  - Message: "Enter a search query to find entries in your journal"
+  - Helpful examples: "Try searching for 'tomatoes', 'last week', or 'watering schedule'"
+
+- **No Results State** (after search):
   - Message: "No results found matching your query: '[query text]'"
-  - "New Search" button to clear and try again
+  - "Clear Search" button to reset and try again
 
 - **Loading State**:
   - Loading spinner displays on "Search" button
@@ -249,22 +269,19 @@ Display AI-powered search results with relevant entries, showing title, date, an
 - **Error State**:
   - Inline Message: "An error occurred while processing your search. Please try again."
   - "Try Again" button to retry the same query
-  - "Close" button
 
 **UX, Accessibility, and Security Considerations**:
-- Search input focused on modal open
+- Search input focused on page load
 - Enter key triggers search
-- Escape key closes modal
-- Click outside modal closes it
 - Minimum/maximum character validation before allowing search
 - Real-time character counter (optional)
 - Keyword highlighting uses background color or bold text for visibility
-- Results are scrollable within modal if many results
+- Results are scrollable if many results
 - Search button shows loading state, preventing duplicate submissions
 - Clear error messages with actionable next steps
 - Search history not stored in UI (privacy)
-- Clicking entry from results closes search modal and opens entry modal
-- Modal is fully responsive
+- Clicking entry from results opens Entry Modal in view mode
+- Responsive layout for all screen sizes
 - ARIA live region announces search results count
 - Screen reader compatible with keyboard navigation through results
 
@@ -394,24 +411,26 @@ Inform users they have reached the maximum entry limit and cannot create new ent
 ### 3.7 AI Search Flow
 
 1. **Calendar View** → User viewing `/calendar`
-2. **Search Access** → User clicks search button in navigation
-3. **Modal Opens** → Search Modal opens with input focused
-4. **Enter Query** → User types natural language query (e.g., "when did I plant tomatoes?")
-5. **Character Validation** → Search button enabled after 3+ characters
-6. **Submit** → User clicks "Search" or presses Enter
-7. **Loading** → Loading spinner appears, button disabled
-8. **API Processing** → POST request to search endpoint
-9. **Results Display** → Results appear with AI summary and entry list
-10. **Browse Results** → User reads snippets with highlighted keywords
-11. **Select Entry** → User clicks entry title from results
-12. **Entry Modal Opens** → Search modal closes, Entry Modal opens in view mode
-13. **Read Entry** → User views full entry details
+2. **Search Access** → User clicks "Search" link in sidebar navigation
+3. **Navigate to Search** → Browser navigates to `/search` view
+4. **Search Page Loads** → Search view displays with input focused
+5. **Enter Query** → User types natural language query (e.g., "when did I plant tomatoes?")
+6. **Character Validation** → Search button enabled after 3+ characters
+7. **Submit** → User clicks "Search" or presses Enter
+8. **Loading** → Loading spinner appears, button disabled
+9. **API Processing** → POST request to search endpoint
+10. **Results Display** → Results appear with AI summary and entry list
+11. **Browse Results** → User reads entry titles and dates
+12. **Select Entry** → User clicks entry title from results
+13. **Entry Modal Opens** → Entry Modal opens in view mode (over search view)
+14. **Read Entry** → User views full entry details
+15. **Return to Search** → User closes modal, returns to search results
 
 **Alternative Paths**:
-- **No Results**: "No results found" message with suggestions
+- **No Results**: "No results found" message with "Clear Search" option
 - **Search Error**: Error message with "Try Again" option
 - **New Search**: User clears and enters new query
-- **Close Without Selection**: User closes modal, returns to calendar
+- **Return to Calendar**: User clicks "Gardening Journal" link in sidebar
 - **Character Limit**: User exceeds 200 characters, validation prevents submission
 
 ---
@@ -447,24 +466,23 @@ Inform users they have reached the maximum entry limit and cannot create new ent
 - Minimal navigation
 - Logo/app name links to login page
 
-**Authenticated Views** (Dashboard/Calendar):
-- **Top Navigation Bar** (fixed position, always visible):
-  - Left: Logo/app name (links to dashboard)
-  - Center: Search button with "Ask AI to find..." text
-  - Right: Entry counter "X/50 entries" | User menu dropdown
-    - User menu options:
-      - User email display
-      - Logout
-
-- **Week Navigation Bar** (below top navigation):
-  - Previous Week button | Week display "Week X: [Date Range]" | Next Week button
-  - Full-width, horizontally centered
+**Authenticated Views** (Dashboard/Calendar/Search):
+- **Sidebar** (fixed position, left side, always visible):
+  - Application logo/name (top)
+  - Navigation links:
+    - Gardening Journal (links to /calendar)
+    - Search (links to /search)
+  - User menu (bottom):
+    - User email display
+    - Logout button
+  - Collapsible on mobile (hamburger toggle)
 
 - **Main Content Area**:
-  - Calendar list view (7 days)
+  - Calendar View: Week navigation bar + Calendar list view (7 days)
+  - Search View: Search interface + Results
   - Scrollable content
 
-- **Floating Elements**:
+- **Floating Elements** (Calendar View only):
   - "Jump to Today" button (bottom-right, only visible when not on current week)
 
 ### 4.2 Layout Hierarchy
@@ -472,39 +490,59 @@ Inform users they have reached the maximum entry limit and cannot create new ent
 ```
 Unauthenticated Layout:
 ├── Simple Header (logo/name)
-├── Main Content (centered form)
+└── Main Content (centered form)
 
-Authenticated Layout:
-├── Top Navigation Bar (fixed)
+Authenticated Layout (Calendar View):
+├── Sidebar (fixed left)
 │   ├── Logo
-│   ├── Search Button
-│   ├── Entry Counter
+│   ├── Navigation Links
+│   │   ├── Gardening Journal (active)
+│   │   └── Search
 │   └── User Menu
-├── Week Navigation Bar
-│   ├── Previous Button
-│   ├── Week Display
-│   └── Next Button
-├── Main Content (scrollable)
+│       ├── User Email
+│       └── Logout
+├── Main Content Area (scrollable)
+│   ├── Week Navigation Bar
+│   │   ├── Previous Button
+│   │   ├── Week Display
+│   │   └── Next Button
 │   └── Calendar List (7 days)
 │       ├── Day 1 (Date | Add Entry button | Entry list)
 │       ├── Day 2 (Date | Add Entry button | Entry list)
 │       └── ... Day 7
 └── Floating Button (Jump to Today)
 
+Authenticated Layout (Search View):
+├── Sidebar (fixed left)
+│   ├── Logo
+│   ├── Navigation Links
+│   │   ├── Gardening Journal
+│   │   └── Search (active)
+│   └── User Menu
+│       ├── User Email
+│       └── Logout
+└── Main Content Area (scrollable)
+    ├── Search Heading
+    ├── Search Input & Button
+    └── Results Area
+        ├── Results Header
+        └── Entry Cards List
+
 Modal Overlays (rendered above all content):
 ├── Entry Modal (create/view/edit states)
-├── Search Modal
 └── Entry Limit Modal
 ```
 
 ### 4.3 Navigation Patterns
 
-**Primary Navigation**:
-- Logo always returns to dashboard (calendar view)
-- Search button opens search modal
-- User menu provides logout and settings access
+**Primary Navigation** (Sidebar):
+- Logo/app name links to calendar view
+- Gardening Journal link navigates to /calendar
+- Search link navigates to /search
+- User menu provides logout access
+- Active link visually highlighted
 
-**Secondary Navigation**:
+**Secondary Navigation** (Calendar View):
 - Week navigation (previous/next buttons)
 - Jump to Today floating button
 
@@ -512,6 +550,7 @@ Modal Overlays (rendered above all content):
 - Entry titles clickable to open view modal
 - "Add Entry" buttons for each date
 - Modal close buttons and overlay clicks
+- Sidebar links navigate between main views
 
 ### 4.4 Responsive Breakpoints
 
@@ -664,23 +703,6 @@ Modal Overlays (rendered above all content):
 - Loading states
 - Error handling
 
-#### Search Modal Component
-**Purpose**: Search interface with results display
-
-**State**:
-- `query` (string): Search query
-- `results` (Array): Search results
-- `loading` (boolean): Search in progress
-- `error` (string): Error message
-
-**Features**:
-- Character validation (3-200)
-- Results display with highlighted keywords
-- Clickable results
-- No results state
-- Error state with retry
-- Loading state
-
 ---
 
 ### 5.4 Display Components
@@ -732,8 +754,14 @@ Modal Overlays (rendered above all content):
 
 ### 6.3 Modal State
 - Entry modal: open/closed, mode (create/view/edit), current entry
-- Search modal: open/closed, query, results, loading, error
 - Entry limit modal: open/closed
+
+### 6.4 Search View State
+- Query string
+- Search results (Array)
+- Loading state
+- Error state
+- Results count
 
 ### 6.4 API Response Handling
 - Success: Update state, close modals, refresh data
@@ -845,10 +873,10 @@ Modal Overlays (rendered above all content):
 - **US-012 (Delete Journal Entry)**: Delete button in Entry Modal, Confirmation Dialog Component
 
 ### Search Stories (US-013 to US-016)
-- **US-013 (Access AI Search Interface)**: Search button in Navigation Bar, Search Modal Component
-- **US-014 (Perform AI Natural Language Search)**: Search input and submit in Search Modal
-- **US-015 (View AI Search Results)**: Search results display in Search Modal, Entry Card Component with highlighted keywords
-- **US-016 (Handle AI Search Errors)**: Error state in Search Modal, Error Message Component
+- **US-013 (Access AI Search Interface)**: Search link in Sidebar, Search View (2.8)
+- **US-014 (Perform AI Natural Language Search)**: Search input and button in Search View
+- **US-015 (View AI Search Results)**: Search results display in Search View, Entry Card Component
+- **US-016 (Handle AI Search Errors)**: Error state in Search View, Error Message Component
 
 ---
 

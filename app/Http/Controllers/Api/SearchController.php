@@ -10,6 +10,13 @@ use App\Models\SearchAnalytic;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Controller to handle search functionality for journal entries.
+ *
+ * This controller processes natural language search queries and returns
+ * relevant journal entries. It includes a placeholder for future AI integration
+ * to enhance search capabilities.
+ */
 class SearchController extends Controller
 {
     /**
@@ -23,7 +30,7 @@ class SearchController extends Controller
         try {
             $query = $request->validated()['query'];
             $user = $request->user();
-            
+
             $entries = JournalEntry::query()
                 ->sortByDate('desc')
                 ->get();
@@ -42,13 +49,13 @@ class SearchController extends Controller
             // ============================================================
 
             $filteredEntries = $this->performBasicSearch($entries, $query);
-            
+
             $formattedEntries = JournalEntryResource::collection($filteredEntries);
-            
+
             $resultsCount = $filteredEntries->count();
-            
+
             $this->logSearchAnalytics($user->id, $query, $resultsCount);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [

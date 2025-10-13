@@ -25,7 +25,4 @@
             :can-add-entry="$canAddEntry"
         />
     @endif
-
-    {{-- Entry Modal --}}
-    <livewire:entry-modal />
 </div>

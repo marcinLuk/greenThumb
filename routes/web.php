@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\CalendarView;
+use App\Livewire\Search;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -21,6 +22,10 @@ Route::view('dashboard', 'dashboard')
 Route::get('calendar', CalendarView::class)
     ->middleware(['auth', 'verified'])
     ->name('calendar');
+
+Route::get('search', Search::class)
+    ->middleware(['auth', 'verified'])
+    ->name('search');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
