@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CalendarView extends Component
@@ -103,6 +104,17 @@ class CalendarView extends Component
             // If we can't check the limit, assume they can add entries
             $this->canAddEntry = true;
         }
+    }
+
+    /**
+     * Handle entry updates from the EntryModal component.
+     * Reloads the week's entries and checks the entry limit.
+     */
+    #[On('entryUpdated')]
+    public function refreshEntries(): void
+    {
+        $this->loadWeekEntries();
+        $this->checkEntryLimit();
     }
 
     /**
