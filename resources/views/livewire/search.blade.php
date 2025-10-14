@@ -13,7 +13,8 @@
                     placeholder="Ask AI to find..."
                     x-data
                     x-init="$el.focus()"
-                    :disabled="$isLoading"
+                    wire:loading.attr="disabled"
+                    wire:target="submitSearch"
                 />
                 <flux:error name="query" />
                 <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
@@ -22,50 +23,68 @@
             </div>
 
             <div class="flex-auto flex gap-3">
-                <flux:button type="submit" :disabled="$isLoading">
-                    @if($isLoading)
-                        <flux:icon.loading class="size-5" />
-                        Searching...
-                    @else
+                <flux:button
+                    type="submit"
+                    wire:loading.attr="disabled"
+                    wire:target="submitSearch"
+                >
+                    <span wire:loading.remove wire:target="submitSearch">
                         <flux:icon.magnifying-glass class="size-5" />
                         Search
-                    @endif
+                    </span>
+                    <span wire:loading wire:target="submitSearch">
+                        <flux:icon.loading class="size-5" />
+                        Searching...
+                    </span>
                 </flux:button>
 
-                @if($hasSearched && !$isLoading)
-                    <flux:button wire:click="clearSearch" variant="filled">
-                        Clear
-                    </flux:button>
-                @endif
+                <flux:button
+                    wire:click="clearSearch"
+                    variant="filled"
+                    wire:loading.remove
+                    wire:target="submitSearch"
+                    x-show="$wire.hasSearched"
+                >
+                    Clear
+                </flux:button>
             </div>
         </form>
     </div>
 
     {{-- Empty State (before first search) --}}
-    @if(!$hasSearched && !$isLoading)
-        <div class="flex flex-col items-center justify-center py-12 text-center">
-            <flux:icon.magnifying-glass class="size-16 text-zinc-400 dark:text-zinc-500 mb-4" />
-            <p class="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                Search your journal entries
-            </p>
-            <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400 max-w-md">
-                Use natural language to find entries. For example: "when did I water the tomatoes?"
-            </p>
-        </div>
-    @endif
+    <div
+        x-show="!$wire.hasSearched"
+        wire:loading.remove
+        wire:target="submitSearch"
+        class="flex flex-col items-center justify-center py-12 text-center"
+    >
+        <flux:icon.magnifying-glass class="size-16 text-zinc-400 dark:text-zinc-500 mb-4" />
+        <p class="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+            Search your journal entries
+        </p>
+        <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400 max-w-md">
+            Use natural language to find entries. For example: "when did I water the tomatoes?"
+        </p>
+    </div>
 
     {{-- Loading State --}}
-    @if($isLoading)
-        <div class="flex flex-col items-center justify-center py-12">
-            <flux:icon.loading class="size-12 mb-4" />
-            <p class="text-sm text-zinc-500 dark:text-zinc-400">
-                Searching your journal entries...
-            </p>
-        </div>
-    @endif
+    <div
+        wire:loading
+        wire:target="submitSearch"
+        class="flex flex-col items-center justify-center py-12"
+    >
+        <flux:icon.loading class="size-12 mb-4" />
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+            Searching your journal entries...
+        </p>
+    </div>
 
     {{-- Error State --}}
-    @if($hasError && !$isLoading)
+    <div
+        x-show="$wire.hasError"
+        wire:loading.remove
+        wire:target="submitSearch"
+    >
         <div class="">
             <div class="border-red-200 dark:border-red-800">
                 <div class="flex items-start gap-3">
@@ -89,14 +108,18 @@
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 
     {{-- Search Results --}}
-    @if($hasSearched && !$hasError && !$isLoading)
-        <div class=" space-y-4">
+    <div
+        x-show="$wire.hasSearched && !$wire.hasError"
+        wire:loading.remove
+        wire:target="submitSearch"
+    >
+        <div class="space-y-4">
             {{-- Results Summary --}}
             <div>
-                <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                <p class="text-zinc-700 dark:text-zinc-300">
                     {{ $resultsSummary }}
                 </p>
             </div>
@@ -138,18 +161,5 @@
                 </div>
             @endif
         </div>
-    @endif
-
-    {{-- JavaScript to open entry modal --}}
-    <script>
-        openEntryFromSearch = function(entryId) {
-            console.log(Livewire)
-
-            const modal = Livewire.getByName('entry-modal')[0];
-            console.log(modal)
-            if (modal) {
-                modal.openEditModal(entryId);
-            }
-        }
-    </script>
+    </div>
 </div>

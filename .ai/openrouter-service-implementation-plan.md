@@ -2,7 +2,9 @@
 
 ## 1. Service Description
 
-The OpenRouter service is a PHP-based HTTP client wrapper that interacts with the OpenRouter API (https://openrouter.ai/api/v1/chat/completions) to perform LLM-based chat completions. The service provides a clean, Laravel-idiomatic interface for sending messages to various AI models, receiving responses (both streamed and non-streamed), and handling structured JSON outputs via JSON Schema validation.
+The OpenRouter service is a PHP-based HTTP client wrapper that interacts with the OpenRouter API (https://openrouter.ai/api/v1/chat/completions) to perform LLM-based chat completions. 
+The service provides a clean, Laravel-idiomatic interface for sending messages to various AI models, receiving responses (both streamed and non-streamed), 
+and handling structured JSON outputs via JSON Schema validation.
 
 ### Purpose
 - Abstracts OpenRouter API communication details
@@ -24,15 +26,6 @@ The OpenRouter service is a PHP-based HTTP client wrapper that interacts with th
 
 ## 2. Constructor Description
 
-```php
-public function __construct(
-    private readonly string $apiKey,
-    private readonly string $baseUrl = 'https://openrouter.ai/api/v1',
-    private readonly ?HttpClient $httpClient = null,
-    private readonly ?LoggerInterface $logger = null
-)
-```
-
 ### Parameters
 
 1. **$apiKey** (string, required)
@@ -53,12 +46,6 @@ public function __construct(
    - Enables dependency injection for testing
    - Should support timeout, retry logic, and streaming
 
-4. **$logger** (LoggerInterface, optional)
-   - PSR-3 compatible logger instance
-   - Defaults to Laravel's Log facade if null
-   - Used for debugging, error tracking, and audit trails
-   - Should redact sensitive information (API keys, user data)
-
 ### Constructor Responsibilities
 - Validate API key is not empty
 - Initialize HTTP client with default timeout (30s) and retry logic (3 attempts)
@@ -70,15 +57,6 @@ public function __construct(
 ## 3. Public Methods and Fields
 
 ### 3.1 Primary Method: `chat()`
-
-```php
-public function chat(
-    array $messages,
-    string $model,
-    ?array $responseFormat = null,
-    array $parameters = []
-): OpenRouterResponse
-```
 
 **Purpose**: Execute a chat completion request with full control over messages, model, response format, and parameters.
 
@@ -227,37 +205,6 @@ $result = $service->chatStructured(
 
 // Returns: ['location' => 'Paris', 'temperature' => 18, 'conditions' => 'Sunny']
 ```
-
----
-
-#### `chatStream()`
-
-```php
-public function chatStream(
-    array $messages,
-    string $model,
-    callable $callback,
-    array $parameters = []
-): void
-```
-
-**Purpose**: Stream responses in real-time chunks.
-
-**Example**:
-```php
-$service->chatStream(
-    [
-        ['role' => 'user', 'content' => 'Write a short story']
-    ],
-    'openai/gpt-4',
-    function (string $chunk) {
-        echo $chunk; // Print each chunk as it arrives
-    },
-    ['temperature' => 0.8]
-);
-```
-
----
 
 ### 3.3 Configuration Methods
 
@@ -447,31 +394,6 @@ private function sendRequest(string $endpoint, array $payload): array
 
 **Throws**: Various OpenRouter exceptions based on status code.
 
----
-
-#### `handleStreamingResponse()`
-
-```php
-private function handleStreamingResponse(
-    ResponseInterface $response,
-    callable $callback
-): void
-```
-
-**Purpose**: Process Server-Sent Events (SSE) stream.
-
-**Implementation**:
-1. Read response body as stream
-2. Parse each line starting with `data: `
-3. Skip lines with `data: [DONE]`
-4. Decode JSON chunk
-5. Extract `choices[0].delta.content`
-6. Invoke callback with content chunk
-7. Continue until stream ends
-
-**Error Handling**: Log and rethrow exceptions during streaming.
-
----
 
 #### `parseResponse()`
 
@@ -490,50 +412,6 @@ private function parseResponse(array $response): OpenRouterResponse
 6. If response_format was json_schema, decode content as JSON
 7. Create and return OpenRouterResponse object
 
----
-
-#### `logRequest()`
-
-```php
-private function logRequest(string $endpoint, array $payload): void
-```
-
-**Purpose**: Log API requests for debugging.
-
-**Implementation**:
-1. Redact sensitive data (API key in headers)
-2. Truncate large payloads
-3. Log at DEBUG level with context:
-   ```php
-   $this->logger?->debug('OpenRouter API Request', [
-       'endpoint' => $endpoint,
-       'model' => $payload['model'],
-       'message_count' => count($payload['messages']),
-       'has_response_format' => isset($payload['response_format'])
-   ]);
-   ```
-
----
-
-#### `logResponse()`
-
-```php
-private function logResponse(OpenRouterResponse $response): void
-```
-
-**Purpose**: Log API responses.
-
-**Implementation**:
-```php
-$this->logger?->debug('OpenRouter API Response', [
-    'id' => $response->id,
-    'model' => $response->model,
-    'finish_reason' => $response->finishReason,
-    'tokens_used' => $response->usage['total_tokens'] ?? null
-]);
-```
-
----
 
 ## 5. Error Handling
 
@@ -805,23 +683,6 @@ Laravel's HTTP facade is sufficient, but ensure Guzzle is installed:
 ```bash
 composer require guzzlehttp/guzzle
 ```
-
-#### Step 1.3: Configure Environment
-Add to `.env`:
-```env
-OPENROUTER_API_KEY=your_api_key_here
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-```
-
-Add to `config/services.php`:
-```php
-'openrouter' => [
-    'api_key' => env('OPENROUTER_API_KEY'),
-    'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
-],
-```
-
----
 
 ### Phase 2: Create Exception Classes
 
@@ -1336,140 +1197,8 @@ public function register(): void
 
 ---
 
-### Phase 7: Testing
-
-#### Step 7.1: Create Unit Tests
-Create `tests/Unit/OpenRouterServiceTest.php`:
-```php
-<?php
-
-namespace Tests\Unit;
-
-use Tests\TestCase;
-use App\Services\OpenRouter\OpenRouterService;
-use Illuminate\Support\Facades\Http;
-
-class OpenRouterServiceTest extends TestCase
-{
-    public function test_validates_empty_messages(): void
-    {
-        $service = new OpenRouterService('test-key');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $service->chat([], 'openai/gpt-4');
-    }
-
-    public function test_validates_message_structure(): void
-    {
-        $service = new OpenRouterService('test-key');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $service->chat([
-            ['role' => 'user'] // Missing content
-        ], 'openai/gpt-4');
-    }
-
-    public function test_successful_simple_chat(): void
-    {
-        Http::fake([
-            '*' => Http::response([
-                'id' => 'test-id',
-                'model' => 'openai/gpt-4',
-                'choices' => [
-                    [
-                        'message' => ['content' => 'Hello!'],
-                        'finish_reason' => 'stop'
-                    ]
-                ],
-                'usage' => ['total_tokens' => 10]
-            ], 200)
-        ]);
-
-        $service = new OpenRouterService('test-key');
-        $result = $service->chatSimple('Hello');
-
-        $this->assertEquals('Hello!', $result);
-    }
-}
-```
-
-#### Step 7.2: Create Feature Tests
-Create `tests/Feature/OpenRouterServiceTest.php` with integration tests.
-
-#### Step 7.3: Run Tests
-```bash
-php artisan test tests/Unit/OpenRouterServiceTest.php
-php artisan test tests/Feature/OpenRouterServiceTest.php
-```
-
----
-
-### Phase 8: Documentation and Usage Examples
-
-#### Step 8.1: Create Usage Examples
-Create `docs/openrouter-usage.md` with examples:
-
-```php
-// Simple chat
-$service = app(OpenRouterService::class);
-$response = $service->chatSimple('What is Laravel?');
-
-// Structured response
-$weatherData = $service->chatStructured(
-    messages: [
-        ['role' => 'user', 'content' => 'Weather in Tokyo?']
-    ],
-    model: 'openai/gpt-4',
-    schemaName: 'weather',
-    schema: [
-        'type' => 'object',
-        'properties' => [
-            'city' => ['type' => 'string'],
-            'temperature' => ['type' => 'number'],
-            'conditions' => ['type' => 'string']
-        ],
-        'required' => ['city', 'temperature', 'conditions'],
-        'additionalProperties' => false
-    ]
-);
-
-// Streaming
-$service->chatStream(
-    messages: [
-        ['role' => 'user', 'content' => 'Tell me a story']
-    ],
-    model: 'openai/gpt-4',
-    callback: fn($chunk) => echo $chunk
-);
-```
-
-#### Step 8.2: Add PHPDoc Comments
-Document all public methods with:
-- Parameter descriptions
-- Return type details
-- Exception documentation
-- Usage examples
-
----
-
-### Phase 9: Performance Optimization
-
-#### Step 9.1: Implement Caching
-Consider caching responses for identical requests:
-```php
-public function chatWithCache(array $messages, string $model, int $ttl = 3600): OpenRouterResponse
-{
-    $cacheKey = 'openrouter:' . md5(json_encode($messages) . $model);
-
-    return Cache::remember($cacheKey, $ttl, function () use ($messages, $model) {
-        return $this->chat($messages, $model);
-    });
-}
-```
-
 #### Step 9.2: Add Request Retry with Exponential Backoff
 Implement the `sendRequestWithRetry()` method from section 5.3.
-
 ---
 
 ### Phase 10: Deployment Checklist
@@ -1485,21 +1214,3 @@ Implement the `sendRequestWithRetry()` method from section 5.3.
 - [ ] Set up monitoring/alerts for API errors
 - [ ] Configure queue workers if using async processing
 
----
-
-## Conclusion
-
-This implementation plan provides a comprehensive, production-ready OpenRouter service for Laravel applications. The service follows Laravel best practices, includes robust error handling, supports all OpenRouter API features (including structured outputs via JSON Schema), and is designed for maintainability and testability.
-
-Key features:
-- Type-safe PHP implementation with readonly properties
-- Comprehensive validation at every level
-- Structured JSON responses via json_schema
-- Streaming support for real-time output
-- Robust error handling with specific exception types
-- Security best practices (API key management, input sanitization)
-- Extensive logging for debugging
-- Service container integration
-- Full test coverage
-
-Follow the step-by-step implementation plan to build the service incrementally, testing each phase before proceeding to the next.

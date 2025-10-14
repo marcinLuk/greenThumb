@@ -9,6 +9,7 @@
 .env
 .env.backup
 .env.production
+.env.dusk.local
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -23,3 +24,4 @@ yarn-error.log
 /.zed
 /.claude
 docker-compose.yml
+/tests/coverage
