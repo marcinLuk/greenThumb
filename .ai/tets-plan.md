@@ -17,7 +17,7 @@ Primary Success Criteria:
 2.1 Testing Stack
 
 - Framework: PHPUnit (Laravel's default testing framework)
-- Database: In-memory SQLite for unit/feature tests, MySQL for integration tests
+- Database: In-memory MySQL for unit/feature tests, MySQL for integration tests
 - Browser Testing: Laravel Dusk (for end-to-end testing)
 - API Testing: Laravel HTTP testing utilities
 - Mocking: Mockery (included with Laravel)
@@ -26,7 +26,7 @@ Primary Success Criteria:
 2.2 Test Data Strategy
 
 // Required Factories
-- UserFactory (with email verified/unverified states)
+- UserFactory
 - JournalEntryFactory (with past/present dates)
 - SearchAnalyticsFactory (for metrics testing)
 
@@ -36,7 +36,7 @@ Primary Success Criteria:
 
 2.3 Environment Configuration
 
-Test environment variables should be configured for SQLite testing, synchronous queue processing, log-based mail handling, and mock OpenRouter API key.
+Test environment variables should be configured for MYSQL testing, synchronous queue processing, log-based mail handling, and mock OpenRouter API key.
 
   ---
 3. Test Organization Structure
@@ -61,9 +61,7 @@ Test Cases:
 | Test Case ID | Test Description                           | Expected Outcome                    |
   |--------------|--------------------------------------------|-------------------------------------|
 | UT-USER-001  | User can be created with valid attributes  | User instance created successfully  |
-| UT-USER-002  | Password is hashed on creation             | Password stored as bcrypt hash      |
 | UT-USER-003  | User has many journal entries relationship | Returns JournalEntry collection     |
-| UT-USER-004  | User can check email verification status   | Returns correct boolean value       |
 | UT-USER-005  | User can check entry count limit (50 max)  | Returns true/false based on count   |
 | UT-USER-006  | Soft deletes work correctly                | User marked as deleted, not removed |
 | UT-USER-007  | User search analytics relationship         | Returns SearchAnalytics collection  |
@@ -76,7 +74,6 @@ Test Cases:
   |--------------|---------------------------------------------|-----------------------------------|
 | UT-ENTRY-001 | Entry can be created with valid data        | Entry created successfully        |
 | UT-ENTRY-002 | Entry belongs to user relationship          | Returns User instance             |
-| UT-ENTRY-003 | Entry date is cast to Carbon instance       | Date is Carbon object             |
 | UT-ENTRY-004 | Entry date has no time component            | Time is 00:00:00                  |
 | UT-ENTRY-005 | Entry validation prevents future dates      | Validation fails for future dates |
 | UT-ENTRY-006 | Entry title is required                     | Validation fails without title    |
@@ -153,24 +150,7 @@ Test Cases:
 | FT-REG-004   | Registration requires password confirmation   | Mismatched passwords          | Validation error displayed            | 422            |
 | FT-REG-005   | Registration prevents duplicate emails        | Existing email address        | Error message displayed               | 422            |
 | FT-REG-006   | Registration creates unverified user          | Valid registration            | User.email_verified_at is null        | 302            |
-| FT-REG-007   | Registration sends verification email         | Valid registration            | Email queued/sent                     | 302            |
 | FT-REG-008   | Registration redirects to verification notice | Valid registration            | Redirects to verify notice page       | 302            |
-
-5.1.2 Email Verification Test (tests/Feature/Auth/EmailVerificationTest.php)
-
-User Story: US-002 - Email VerificationPriority: Critical
-
-Test Cases:
-
-| Test Case ID  | Test Description                        | Expected Outcome                       | HTTP Status |
-  |---------------|-----------------------------------------|----------------------------------------|-------------|
-| FT-VERIFY-001 | User can verify email with valid link   | Email verified, redirect to dashboard  | 302         |
-| FT-VERIFY-002 | Verification marks user as verified     | User.email_verified_at populated       | 200         |
-| FT-VERIFY-003 | Expired verification link shows error   | Error message, redirect to resend page | 403         |
-| FT-VERIFY-004 | Invalid verification link shows error   | Error message displayed                | 403         |
-| FT-VERIFY-005 | User can request new verification email | New email sent                         | 302         |
-| FT-VERIFY-006 | Already verified user cannot reverify   | Redirect to dashboard                  | 302         |
-| FT-VERIFY-007 | Unverified user cannot access dashboard | Redirect to verification notice        | 302         |
 
 5.1.3 Login Test (tests/Feature/Auth/LoginTest.php)
 
@@ -337,7 +317,6 @@ Test Cases:
 | FT-SEARCH-008 | Search is user-isolated                  | User A's query               | Only user A's entries         | 200         |
 | FT-SEARCH-009 | Search displays loading indicator        | Any valid query              | Spinner shows during API call | 200         |
 | FT-SEARCH-010 | Unauthenticated user cannot search       | N/A                          | Redirect to login             | 401         |
-| FT-SEARCH-011 | Search excludes data from AI training    | Any valid query              | Training flag is false        | 200         |
 
 5.4.2 Search Error Handling Test (tests/Feature/Search/SearchErrorHandlingTest.php)
 
@@ -424,20 +403,6 @@ Test Cases:
 
 Note: These tests should be tagged @integration and run separately from unit/feature tests.
 
-6.2 Email Delivery Test (tests/Integration/EmailDeliveryTest.php)
-
-Purpose: Test actual email delivery (using Mailtrap or similar in staging)
-
-Test Cases:
-
-| Test Case ID | Test Description                         | Expected Outcome             |
-  |--------------|------------------------------------------|------------------------------|
-| IT-EMAIL-001 | Verification email delivers successfully | Email received in inbox      |
-| IT-EMAIL-002 | Password reset email delivers            | Email received in inbox      |
-| IT-EMAIL-003 | Email contains correct verification link | Link is valid and functional |
-| IT-EMAIL-004 | Email formatting is correct              | HTML renders properly        |
-| IT-EMAIL-005 | Email sender is correct                  | From address is correct      |
-
 6.3 End-to-End User Journey Test (tests/Integration/EndToEndUserJourneyTest.php)
 
 Purpose: Test complete user workflows from registration to AI search
@@ -464,7 +429,6 @@ Test Cases:
   |--------------|------------------------------------|-----------------------------|
 | BT-REG-001   | Fill registration form, submit     | User redirected, email sent |
 | BT-REG-002   | Submit with missing fields         | Validation messages appear  |
-| BT-REG-003   | Click verification link from email | Account activated           |
 | BT-REG-004   | Attempt duplicate registration     | Error message shown         |
 
 7.2 Journal Entry Flow Test (tests/Browser/JournalEntryFlowTest.php)
@@ -507,100 +471,7 @@ Test Cases:
 | BT-MOBILE-006 | 360x640 (Android)   | Touch interactions | Taps register correctly |
 
   ---
-8. Security Tests
 
-8.1 Authentication Security Test (tests/Feature/Security/AuthenticationSecurityTest.php)
-
-User Story: US-021 - Data Privacy Compliance
-
-Test Cases:
-
-| Test Case ID | Security Test                           | Expected Outcome              |
-  |--------------|-----------------------------------------|-------------------------------|
-| ST-AUTH-001  | Password is hashed in database          | bcrypt hash stored            |
-| ST-AUTH-002  | Session tokens are regenerated on login | CSRF token changes            |
-| ST-AUTH-003  | Failed login rate limiting works        | Lockout after 5 attempts      |
-| ST-AUTH-004  | Session expires after inactivity        | User logged out after timeout |
-| ST-AUTH-005  | Password reset tokens expire            | Token invalid after 60 min    |
-| ST-AUTH-006  | XSS prevention in input fields          | Scripts are escaped           |
-| ST-AUTH-007  | CSRF protection on forms                | CSRF token required           |
-
-8.2 Data Isolation Test (tests/Feature/Security/DataIsolationTest.php)
-
-Test Cases:
-
-| Test Case ID | Security Test                                   | Expected Outcome            |
-  |--------------|-------------------------------------------------|-----------------------------|
-| ST-DATA-001  | User A cannot view User B's entries             | 403 Forbidden               |
-| ST-DATA-002  | User A cannot edit User B's entries             | 403 Forbidden               |
-| ST-DATA-003  | User A cannot delete User B's entries           | 403 Forbidden               |
-| ST-DATA-004  | Search only returns user's own entries          | Results filtered by user_id |
-| ST-DATA-005  | Direct API calls to other user's resources fail | Authorization check fails   |
-| ST-DATA-006  | SQL injection attempts are prevented            | Query sanitized             |
-
-8.3 AI Privacy Test (tests/Feature/Security/AIPrivacyTest.php)
-
-Test Cases:
-
-| Test Case ID   | Privacy Test                         | Expected Outcome           |
-  |----------------|--------------------------------------|----------------------------|
-| ST-PRIVACY-001 | AI requests include training opt-out | Flag present in API call   |
-| ST-PRIVACY-002 | User data sent server-side only      | No client-side API calls   |
-| ST-PRIVACY-003 | Analytics data is anonymized         | PII removed from logs      |
-| ST-PRIVACY-004 | Search queries are user-isolated     | No cross-user data leakage |
-
-  ---
-9. Performance Tests
-
-9.1 Load Performance Test (tests/Performance/LoadPerformanceTest.php)
-
-Success Metric: AI search response time <3 seconds (95th percentile)
-
-Test Cases:
-
-| Test Case ID | Performance Test            | Target      | Measurement          |
-  |--------------|-----------------------------|-------------|----------------------|
-| PT-LOAD-001  | Calendar page load time     | < 500ms     | Response time        |
-| PT-LOAD-002  | Entry creation response     | < 300ms     | Response time        |
-| PT-LOAD-003  | AI search response time     | < 3s (95th) | API latency          |
-| PT-LOAD-004  | Week navigation response    | < 200ms     | Livewire update time |
-| PT-LOAD-005  | Database query optimization | < 100ms     | Query execution time |
-
-Tools: Laravel Telescope for monitoring, custom performance logging
-
-9.2 Scalability Test
-
-Test Cases:
-
-| Test Case ID | Scenario                  | Load                   | Expected Outcome      |
-  |--------------|---------------------------|------------------------|-----------------------|
-| PT-SCALE-001 | 50 entries per user       | 1000 users             | All queries < targets |
-| PT-SCALE-002 | Concurrent AI searches    | 10 simultaneous        | Queue handles load    |
-| PT-SCALE-003 | Calendar with max entries | 50 entries in one week | Renders in < 500ms    |
-
-  ---
-10. Acceptance Testing
-
-10.1 User Story Validation
-
-For each user story (US-001 through US-023), create a comprehensive acceptance test that validates ALL acceptance criteria.
-
-10.2 UAT Checklist
-
-Prior to release, manually verify:
-
-- All 23 user stories pass acceptance criteria
-- Primary success metric tracking works (3+ searches per user)
-- Email delivery works in production environment
-- OpenRouter API integration works with production key
-- Mobile responsiveness on real devices (iOS Safari, Chrome Android)
-- Cross-browser compatibility (Chrome, Firefox, Safari, Edge)
-- SSL/HTTPS works correctly
-- Privacy policy page displays correctly
-- Error pages (404, 500) display correctly
-- Performance meets targets in production environment
-
-  ---
 11. Test Execution Strategy
 
 11.1 Test Execution Order
@@ -624,22 +495,7 @@ Prior to release, manually verify:
    - Journal entry flow
    - AI search flow
    - Mobile responsiveness
-5. Phase 5: Security & Performance Tests
-   - Security tests
-   - Performance tests
-6. Phase 6: Acceptance Testing
-   - User story validation
-   - UAT checklist
 
-11.2 Continuous Integration
-
-A GitHub Actions workflow should be configured to run tests automatically on push and pull requests. The workflow should:
-- Set up PHP 8.3 environment
-- Install dependencies with Composer
-- Run unit tests
-- Run feature tests
-- Run browser tests with Dusk
-- Upload coverage reports to Codecov
 
 11.3 Test Data Management
 
@@ -692,98 +548,6 @@ Each test class should include:
 - Appropriate @group tags for test organization
 
   ---
-13. Risk-Based Testing Priority
-
-13.1 Critical (P0) - Must Pass Before Release
-
-- User registration and authentication (US-001, US-002, US-003)
-- Email verification (US-002)
-- Journal entry CRUD operations (US-009, US-010, US-011, US-012)
-- AI search functionality (US-014, US-015)
-- Data isolation/security (US-021)
-- 50 entry limit enforcement (US-009)
-
-13.2 High (P1) - Should Pass Before Release
-
-- Password reset flow (US-004, US-005)
-- Calendar navigation (US-007, US-008)
-- Search error handling (US-016)
-- Mobile responsiveness (US-022)
-- Session management (US-019)
-
-13.3 Medium (P2) - Nice to Have
-
-- Calendar empty states (US-020)
-- Entry validation feedback (US-023)
-- Performance optimization tests
-- Cross-browser compatibility
-
-  ---
-14. Defect Management
-
-14.1 Bug Severity Levels
-
-Critical (Sev 1):
-- Authentication failures
-- Data loss
-- Security vulnerabilities
-- Application crashes
-
-High (Sev 2):
-- Feature not working as specified
-- AI search failures
-- Email delivery failures
-
-Medium (Sev 3):
-- UI/UX issues
-- Performance degradation
-- Minor validation errors
-
-Low (Sev 4):
-- Cosmetic issues
-- Documentation errors
-
-14.2 Bug Workflow
-
-1. Discovery: Log bug with reproduction steps
-2. Triage: Assign severity and priority
-3. Assignment: Assign to developer
-4. Fix: Developer fixes and writes regression test
-5. Verification: QA verifies fix and regression test
-6. Closure: Bug marked as resolved
-
-  ---
-15. Success Criteria
-
-The test plan is considered successful when:
-
-✅ Coverage Targets Met:
-- 80%+ overall code coverage
-- 95%+ coverage for critical paths
-
-✅ All Critical Tests Pass:
-- 100% of P0 tests passing
-- 95%+ of P1 tests passing
-
-✅ Performance Targets Met:
-- AI search < 3s (95th percentile)
-- Calendar load < 500ms
-- Entry operations < 300ms
-
-✅ User Stories Validated:
-- All 23 user stories pass acceptance criteria
-- Primary success metric tracking implemented
-
-✅ Security Validated:
-- No critical/high security vulnerabilities
-- Data isolation confirmed
-- Privacy compliance verified
-
-✅ UAT Completed:
-- Manual UAT checklist 100% complete
-- Stakeholder sign-off received
-
-  ---
 16. Appendix
 
 16.1 Test Commands Reference
@@ -810,30 +574,3 @@ Use Laravel's HTTP facade for mocking API responses:
 - Mock API timeouts and errors
 - Mock rate limiting responses
 - Configure different response scenarios for testing
-
-  ---
-Document Control
-
-Version: 1.0Created: October 14, 2025Last Updated: October 14, 2025Author: Senior QA EngineerStatus: Draft - Pending Review
-
-Approval:
-- QA Lead
-- Development Lead
-- Product Owner
-
-Change Log:
-- v1.0 (2025-10-14): Initial test plan created based on PRD v1.0
-
-  ---
-Total Test Cases: 200+Estimated Test Execution Time:
-- Automated: ~15 minutes (Unit + Feature)
-- Integration: ~30 minutes
-- Browser: ~45 minutes
-- Manual UAT: ~4 hours
-
-Next Steps:
-1. Review and approve test plan
-2. Implement factories and seeders
-3. Begin test implementation (unit tests first)
-4. Set up CI/CD pipeline
-5. Configure browser testing environment

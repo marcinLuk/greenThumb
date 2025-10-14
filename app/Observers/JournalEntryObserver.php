@@ -15,10 +15,12 @@ class JournalEntryObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(JournalEntry $journalEntry): void
     {
-        EntriesCount::updateOrCreate(
+        $entriesCount = EntriesCount::firstOrCreate(
             ['user_id' => $journalEntry->user_id],
-            ['count' => \DB::raw('count + 1')]
+            ['count' => 0]
         );
+
+        $entriesCount->increment('count');
     }
 
     /**
