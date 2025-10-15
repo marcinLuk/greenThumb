@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Pest\Browser\Chrome;
 use Tests\TestCase;
 
 /*
@@ -15,7 +16,19 @@ use Tests\TestCase;
 |
 */
 
-pest()->extend(TestCase::class)->in('Feature', 'Unit');
+pest()->extend(TestCase::class)->in('Feature', 'Unit', 'Browser');
+
+/*
+|--------------------------------------------------------------------------
+| Browser Testing Configuration
+|--------------------------------------------------------------------------
+|
+| Configure default browser settings for browser tests. Chrome is used as the default
+| browser with a 5 second timeout. Tests can override these settings as needed.
+|
+*/
+
+pest()->browser(Chrome::class);
 
 /*
 |--------------------------------------------------------------------------
