@@ -192,16 +192,21 @@ This runs 4 concurrent processes:
 ```bash
 composer test
 ```
-Clears config cache and runs PHPUnit tests. Tests use in-memory SQLite database.
+Clears config cache and runs Pest tests. Tests use in-memory SQLite database.
 
 To run a specific test:
 ```bash
-php artisan test --filter TestName
+php artisan test --filter test_name
 ```
 
 To run a specific test file:
 ```bash
-php artisan test tests/Feature/ExampleTest.php
+php artisan test tests/Unit/UserTest.php
+```
+
+To run tests with a specific group:
+```bash
+php artisan test --group models
 ```
 
 ### Code Style

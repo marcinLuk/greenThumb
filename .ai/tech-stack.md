@@ -8,3 +8,5 @@
 - **AI Integration**: OpenRouter.ai
 - **Database**: MySQL
 - **Eloquent ORM** for database interactions
+- **Pest PHP ** for testing
+- **Pest PHP/pest-plugin-browser ** for browser testing
