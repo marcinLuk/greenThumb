@@ -14,7 +14,8 @@ This is a Laravel 12 application using:
 - **Laravel Fortify** for authentication (currently only 2FA is enabled)
 - **Tailwind CSS v4** for styling
 - **Vite** for asset building
-- 
+- **Pest PHP v4** with Browser Testing plugin for testing
+- **Playwright** for browser automation
 
 ## CODING_PRACTICES
 
@@ -159,6 +160,44 @@ This is a Laravel 12 application using:
 - Use x- prefix for Blade components
 - Use @props directive in anonymous components
 
+## TESTING
+
+### Test Organization
+Tests are organized into the following directories:
+- `tests/Unit/` - Unit tests for models, services, and other isolated components
+- `tests/Feature/` - Feature tests for application functionality
+- `tests/Browser/` - Browser tests for end-to-end UI testing with Pest Browser plugin
+- `tests/Integration/` - Integration tests for external service interactions
+- `tests/Performance/` - Performance testing
+- `tests/Security/` - Security testing
+
+### Browser Testing with Pest v4
+
+The project uses **Pest PHP v4** with the **Browser Testing plugin** for end-to-end testing.
+
+#### Key Features:
+- Browser automation via Playwright
+- Support for Chrome, Firefox, and Safari
+- Screenshot capture on failures (saved to `tests/Browser/Screenshots/`)
+- Headless and headed modes
+- Parallel test execution support
+
+#### Browser Testing Best Practices:
+- Organize browser tests in `tests/Browser/` directory
+- Use data-test attributes for stable element selection (preferred over CSS selectors)
+- Follow the comprehensive guidelines in `.ai/rules/PestBrowserRules.md` for:
+  - Element location strategies
+  - Assertion patterns
+  - Form interactions
+  - Debugging techniques
+  - CI/CD configuration
+
+#### Configuration:
+- Browser configuration: `tests/Pest.php`
+- Default browser: Chrome
+- Default timeout: 5 seconds
+- Screenshots directory: `tests/Browser/Screenshots/` (git-ignored)
+
 ## Development Commands
 
 ### Livewire
@@ -208,6 +247,39 @@ To run tests with a specific group:
 ```bash
 php artisan test --group models
 ```
+
+### Browser Testing
+```bash
+./vendor/bin/pest tests/Browser
+```
+Run all browser tests.
+
+```bash
+./vendor/bin/pest tests/Browser --headed
+```
+Run browser tests with visible browser window (useful for debugging).
+
+```bash
+./vendor/bin/pest tests/Browser --debug
+```
+Run browser tests in debug mode (pauses on failure for inspection).
+
+```bash
+./vendor/bin/pest tests/Browser --parallel
+```
+Run browser tests in parallel for improved performance.
+
+```bash
+./vendor/bin/pest tests/Browser --browser=firefox
+```
+Run browser tests with a specific browser (chrome, firefox, safari).
+
+```bash
+./vendor/bin/pest tests/Browser/ExampleTest.php
+```
+Run a specific browser test file.
+
+**Note**: Detailed browser testing standards and best practices are documented in `.ai/rules/PestBrowserRules.md`
 
 ### Code Style
 ```bash
