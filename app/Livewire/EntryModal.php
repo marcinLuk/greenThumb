@@ -169,6 +169,7 @@ class EntryModal extends Component
             $entriesCount = auth()->user()->entriesCount;
             if ($entriesCount && $entriesCount->count >= 50) {
                 $this->errorMSG = 'You have reached the maximum limit of 50 journal entries.';
+
                 return;
             }
 

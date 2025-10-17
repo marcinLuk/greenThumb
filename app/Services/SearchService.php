@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\JournalEntry;
 use App\Services\OpenRouter\OpenRouterService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -15,15 +14,13 @@ class SearchService
 
     public function __construct(
         private readonly OpenRouterService $openRouter
-    )
-    {
-    }
+    ) {}
 
     public function analyzeAndSearch(string $query, Collection $entries): array
     {
         try {
             // Step 1: Validate query is gardening-related
-            if (!$this->isQueryValid($query)) {
+            if (! $this->isQueryValid($query)) {
                 return [
                     'success' => false,
                     'error' => 'Please ask questions related to your gardening journal.',
@@ -158,6 +155,7 @@ SYSTEM;
                 'query' => $query,
                 'error' => $e->getMessage(),
             ]);
+
             // Fail open - if validation fails, allow the query
             return true;
         }

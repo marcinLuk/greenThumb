@@ -38,9 +38,6 @@ class JournalEntryController extends Controller
 
     /**
      * Display a listing of the authenticated user's journal entries.
-     *
-     * @param GetJournalEntriesRequest $request
-     * @return AnonymousResourceCollection
      */
     public function index(GetJournalEntriesRequest $request): AnonymousResourceCollection
     {
@@ -66,13 +63,10 @@ class JournalEntryController extends Controller
 
     /**
      * Display the specified journal entry.
-     *
-     * @param string $id
-     * @return JournalEntryResource|\Illuminate\Http\JsonResponse
      */
     public function show(string $id): JournalEntryResource|JsonResponse
     {
-        if (!is_numeric($id)) {
+        if (! is_numeric($id)) {
             return response()->json([
                 'message' => 'Invalid entry ID format',
             ], 400);
@@ -91,9 +85,6 @@ class JournalEntryController extends Controller
 
     /**
      * Retrieve journal entries within a specific date range for weekly calendar view.
-     *
-     * @param GetEntriesByDateRangeRequest $request
-     * @return JsonResponse
      */
     public function dateRange(GetEntriesByDateRangeRequest $request): JsonResponse
     {
@@ -121,9 +112,6 @@ class JournalEntryController extends Controller
      * Creates a new journal entry for the authenticated user. Enforces a maximum
      * limit of 50 entries per user. The entry must have a date that is today or
      * in the past.
-     *
-     * @param StoreJournalEntryRequest $request
-     * @return JournalEntryResource|JsonResponse
      */
     public function store(StoreJournalEntryRequest $request): JournalEntryResource|JsonResponse
     {
@@ -136,7 +124,6 @@ class JournalEntryController extends Controller
                     'message' => 'You have reached the maximum limit of 50 journal entries.',
                 ], 403);
             }
-
 
             $journalEntry = DB::transaction(function () use ($validated) {
                 $data = array_merge($validated, [
@@ -161,14 +148,10 @@ class JournalEntryController extends Controller
      *
      * Updates an existing journal entry for the authenticated user. Users can only
      * update their own entries. The entry date must be today or in the past.
-     *
-     * @param UpdateJournalEntryRequest $request
-     * @param string $id
-     * @return JournalEntryResource|JsonResponse
      */
     public function update(UpdateJournalEntryRequest $request, string $id): JournalEntryResource|JsonResponse
     {
-        if (!is_numeric($id)) {
+        if (! is_numeric($id)) {
             return response()->json([
                 'message' => 'Invalid entry ID format',
             ], 400);
@@ -206,13 +189,10 @@ class JournalEntryController extends Controller
      * Deletes an existing journal entry for the authenticated user. Users can only
      * delete their own entries. Upon successful deletion, the user's entry count
      * is automatically decremented via the JournalEntryObserver.
-     *
-     * @param string $id
-     * @return JsonResponse
      */
     public function destroy(string $id): JsonResponse
     {
-        if (!is_numeric($id)) {
+        if (! is_numeric($id)) {
             return response()->json([
                 'message' => 'Invalid entry ID format',
             ], 400);
@@ -250,8 +230,6 @@ class JournalEntryController extends Controller
      * Returns the number of journal entries the user has created, along with
      * the remaining entries available (based on the 50-entry limit) and whether
      * the user has reached the maximum limit.
-     *
-     * @return EntriesCountResource
      */
     public function getEntryCount(): EntriesCountResource
     {

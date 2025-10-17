@@ -16,12 +16,19 @@ class Search extends Component
 {
     #[Validate('required|string|min:3|max:500')]
     public string $query = '';
+
     public bool $hasSearched = false;
+
     public bool $isSearching = false;
+
     public array $searchResults = [];
+
     public string $resultsSummary = '';
+
     public int $resultsCount = 0;
+
     public ?string $errorMessage = null;
+
     public bool $hasError = false;
 
     public function submitSearch(SearchService $searchService): void
@@ -41,8 +48,9 @@ class Search extends Component
 
             $result = $searchService->analyzeAndSearch($this->query, $entries);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->handleSearchError($result['error']);
+
                 return;
             }
 
@@ -84,7 +92,7 @@ class Search extends Component
             return 'error';
         }
 
-        if (!$this->hasSearched) {
+        if (! $this->hasSearched) {
             return 'empty';
         }
 

@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace App\Exceptions\OpenRouter;
 
-class OpenRouterRateLimitException extends OpenRouterException
-{
-}
+class OpenRouterRateLimitException extends OpenRouterException {}

@@ -49,7 +49,7 @@ class JournalEntry extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserOwnedScope());
+        static::addGlobalScope(new UserOwnedScope);
     }
 
     /**

@@ -82,7 +82,7 @@ class SearchController extends Controller
      * Perform basic keyword matching search (MVP fallback).
      * This method will be replaced when AI integration is implemented.
      */
-    private function performBasicSearch( $entries, string $query)
+    private function performBasicSearch($entries, string $query)
     {
         $keywords = strtolower($query);
 

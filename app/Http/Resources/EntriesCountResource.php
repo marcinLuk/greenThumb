@@ -18,7 +18,6 @@ class EntriesCountResource extends JsonResource
      * Returns the user's current entry count along with calculated
      * metadata about remaining entries and limit status.
      *
-     * @param Request $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array

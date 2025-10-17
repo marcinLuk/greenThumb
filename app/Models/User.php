@@ -80,8 +80,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the number of remaining entries the user can create.
-     *
-     * @return int
      */
     public function getRemainingEntryCount(): int
     {
@@ -92,8 +90,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if the user has reached the entry limit.
-     *
-     * @return bool
      */
     public function isAtEntryLimit(): bool
     {

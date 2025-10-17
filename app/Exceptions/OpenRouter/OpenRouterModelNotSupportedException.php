@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace App\Exceptions\OpenRouter;
 
-class OpenRouterModelNotSupportedException extends OpenRouterException
-{
-}
+class OpenRouterModelNotSupportedException extends OpenRouterException {}

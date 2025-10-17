@@ -31,11 +31,11 @@ class JournalEntryPolicy
     public function create(User $user): bool
     {
         $entriesCount = $user->entriesCount()->first();
-        
-        if (!$entriesCount) {
+
+        if (! $entriesCount) {
             return true;
         }
-        
+
         return $entriesCount->count < 50;
     }
 

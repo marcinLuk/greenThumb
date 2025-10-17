@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('entries_count', function (Blueprint $table) {
             $table->foreignId('user_id')
-                  ->primary()
-                  ->constrained('users')
-                  ->onDelete('cascade');
+                ->primary()
+                ->constrained('users')
+                ->onDelete('cascade');
             $table->integer('count')->default(0);
         });
     }

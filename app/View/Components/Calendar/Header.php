@@ -29,16 +29,16 @@ class Header extends Component
     {
         // If same month: "October 7-13, 2025"
         if ($this->weekStart->month === $this->weekEnd->month) {
-            return $this->weekStart->format('F j') . '-' . $this->weekEnd->format('j, Y');
+            return $this->weekStart->format('F j').'-'.$this->weekEnd->format('j, Y');
         }
 
         // If different months: "September 30 - October 6, 2025"
         if ($this->weekStart->year === $this->weekEnd->year) {
-            return $this->weekStart->format('F j') . ' - ' . $this->weekEnd->format('F j, Y');
+            return $this->weekStart->format('F j').' - '.$this->weekEnd->format('F j, Y');
         }
 
         // If different years: "December 30, 2024 - January 5, 2025"
-        return $this->weekStart->format('F j, Y') . ' - ' . $this->weekEnd->format('F j, Y');
+        return $this->weekStart->format('F j, Y').' - '.$this->weekEnd->format('F j, Y');
     }
 
     /**
