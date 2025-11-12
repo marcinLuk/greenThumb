@@ -37,7 +37,7 @@ jobs:
         run: ./vendor/bin/pint --test
 
   test:
-    name: Unit Tests
+    name: Unit And E2E Tests
     runs-on: ubuntu-latest
     needs: lint
 
