@@ -81,13 +81,6 @@ jobs:
       - name: Clear config cache
         run: php artisan config:clear
 
-      - name: Wait for MySQL
-        run: |
-          until mysqladmin ping -h 127.0.0.1 -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} --silent; do
-            echo 'waiting for mysql...'
-            sleep 1
-          done
-
       - name: Install Playwright browsers
         run: |
           npx playwright install --with-deps chromium
