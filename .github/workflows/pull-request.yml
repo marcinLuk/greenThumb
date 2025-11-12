@@ -45,8 +45,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: greenthumb_test
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
@@ -101,9 +101,6 @@ jobs:
             echo 'waiting for mysql...'
             sleep 1
           done
-
-      - name: Run database migrations
-        run: php artisan migrate --force
 
       - name: Install Playwright browsers
         run: |
