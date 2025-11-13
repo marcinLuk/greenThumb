@@ -81,6 +81,13 @@ jobs:
       - name: Clear config cache
         run: php artisan config:clear
 
+      - name: Check database connection
+        run: |
+          php artisan db:show || {
+            echo "❌ Database connection to ${{ secrets.DB_HOST }} failed"
+            exit 1
+          }
+
       - name: Install Playwright browsers
         run: |
           npx playwright install --with-deps chromium
