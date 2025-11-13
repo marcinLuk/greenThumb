@@ -24,11 +24,11 @@
             wire:loading.attr="disabled"
             wire:target="submitSearch"
         >
-            <span wire:loading.remove wire:target="submitSearch">
+            <span class="flex" wire:loading.remove wire:target="submitSearch">
                 <flux:icon.magnifying-glass class="size-5" />
                 Search
             </span>
-            <span wire:loading wire:target="submitSearch">
+            <span class="flex" wire:loading wire:target="submitSearch">
                 <flux:icon.loading class="size-5" />
                 Searching...
             </span>
