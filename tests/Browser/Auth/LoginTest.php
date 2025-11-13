@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\assertAuthenticated;
-use function Pest\Laravel\assertGuest;
 
 uses(RefreshDatabase::class);
 
@@ -23,7 +22,6 @@ uses(RefreshDatabase::class);
  * Following standards from .ai/rules/PestBrowserRules.md
  * Screenshots are captured at key points for debugging and documentation
  */
-
 test('login page loads and displays all required elements', function () {
     $this->visit('/login')
         ->assertPathIs('/login')
